@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Faucet | Ethereum Blockchain Testnet</title>
+    <link rel="shortcut icon" type="image/png" href="https://cdn0.iconfinder.com/data/icons/blockchain-classic/256/Ethereum-512.png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- <script src = "./faucet.js"></script> -->
+</head>
+<body>
+    <!-- <form method="POST" action=""> -->
+        <div class="row">
+            <div class="col s12 l4 offset-l4">
+                <div class="card">
+
+                    <div class="card-action teal lighten-2 white-text">
+                        <h3>Ethereum Faucet</h3>
+                    </div>
+
+                    <div class="card-content">
+                        <div class="input-field">
+                            <i class="material-icons prefix">fingerprint</i>
+                            <label for="address">Recepient Ethereum address</label>
+                            <input type="text" id="address" required/>
+                        </div>
+
+                        <div class="input-field">
+                                <i class="material-icons prefix">account_balance_wallet</i>
+                                <label for="amount">Amount in Ethers (<b>5</b> by default)</label>
+                                <input type="text" id="amount" onkeypress="return !(event.charCode > 31 && (event.charCode != 46 &&(event.charCode < 48 || event.charCode > 57)))" required/>
+                        </div>
+
+                        <div class="form-field center-align">
+                                <button class="btn-large waves-effect waves-light teal lighten-2" style="width: 70%; font-size: larger" onclick="validate()">CONFIRM</button>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12 l4 offset-l4">
+                <div class="card-action teal darken-2 white-text" style="border-radius: 10px;">
+                    <p id = "res" align="center" style="display: none; padding: 3%;"></p>
+                </div>
+            </div>
+        </div>
+    <!-- </form> -->
+<script>
+function validate(){
+    const def = 5;
+    const resultBox = document.querySelector("#res");
+    const address = document.querySelector("#address").value;
+    let amount = document.querySelector("#amount").value;
+
+    if (address === ""){
+        resultBox.innerHTML = "Recepient Ethereum address is a required field.";
+        resultBox.style.display = 'block';
+        setTimeout(() => {
+            resultBox.style.display = 'none';
+        }, 3000);
+        return;
+    }
+
+    if (amount == ""){
+        amount = def;
+    }
+
+    if (parseFloat(amount)>10){
+        resultBox.innerHTML = "Please enter an amount less than 10 ethers!";
+        resultBox.style.display = 'block';
+        setTimeout(() => {
+            resultBox.style.display = 'none';
+        }, 3000);
+        return;
+    }
+    //change it to the appropriate ip address that's hosting the faucet-backend service
+    const url = 'http://localhost:3000/fundMe';
+    const data = {
+        to: address,
+        amount: parseFloat(amount)
+    };
+    //console.log(data);
+
+    fetch(url, {
+        mode:"cors",
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-type': 'application/json',
+            'X-Requested-With':  'XMLHttpRequest'
+        }
+    }).then(res => res.json())
+    .catch(error => console.log('Error: ', error))
+    .then(response => {
+        console.log(response);
+        if (response.result === true)
+            resultBox.innerHTML= `SUCCESS! ${amount} ethers credited to your account.<br>Transaction ID: ${response.transactionHash}`;
+        else
+            resultBox.innerHTML = `ERROR! ${response.message}`;
+
+        resultBox.style.display = 'block';
+        setTimeout(() => {
+            resultBox.style.display = 'none';
+        }, 3000);
+    });
+    
+
+    //window.location.reload();
+
+    //For testing
+    //console.log("You amount is "+ address + " and your amount is " + amount);
+}
+</script>
+</body>
+</html>

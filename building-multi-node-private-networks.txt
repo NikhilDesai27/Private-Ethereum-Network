@@ -1,0 +1,5 @@
+Let us see how to build a multi node private network, where each of the geth clients are running on different systems as containers.
+
+Step 1: 
+Run a geth node in one of the systems. In order to do this, follow these steps :
+

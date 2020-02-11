@@ -1,0 +1,95 @@
+version: "3"
+services:
+
+  gethbootnode:
+    environment:
+      - nodekeyhex=08f0e1dee5c1b4645f3331a566009e41a4514b6cd28656d63d0449ecf812812b #Needs to be fix, so that the miners know the resulting enode id
+    build: ./bootnode
+    image: mybootnode
+    ports:
+      - 30301:30301/udp
+    networks:
+      poa:
+        ipv4_address: 172.25.0.2
+  
+  miner:
+    depends_on:
+      - gethbootnode
+    environment:
+      - bootnodeId=76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c #derived from the nodekeyhex of the bootnode
+      - bootnodeIp=172.25.0.2
+    build: ./miner/geth
+    image: myminer
+    ports:
+      - 8545:8545
+      - 8546:8546
+      - 30303:30303
+    networks:
+      poa:
+        ipv4_address: 172.25.0.3
+  
+  node1:
+    depends_on:
+      - gethbootnode
+      - miner
+    environment:
+      - bootnodeId=76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c #derived from the nodekeyhex of the bootnode
+      - bootnodeIp=172.25.0.2
+    build: ./node1/geth
+    image: mynode1
+    ports:
+      - 8547:8545
+      - 8548:8546
+      - 30305:30303
+    networks:
+      poa:
+        ipv4_address: 172.25.0.4
+  
+  node2:
+    depends_on:
+      - gethbootnode
+      - miner
+    environment:
+      - bootnodeId=76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c #derived from the nodekeyhex of the bootnode
+      - bootnodeIp=172.25.0.2
+    build: ./node2/geth
+    image: mynode2
+    ports:
+      - 8549:8545
+      - 8550:8546
+      - 30307:30303
+    networks:
+      poa:
+        ipv4_address: 172.25.0.5
+    # labels:
+    #   kompose.service.expose: "True"
+
+  faucetbackend:
+    depends_on:
+      - gethbootnode
+      - miner
+    build: ./faucet-back-end
+    image: faucetbackend
+    ports:
+      - 3000:3000
+    networks:
+      poa:
+        ipv4_address: 172.25.0.6
+  
+  faucet:
+    depends_on:
+      - faucetbackend
+    build: ./faucet
+    image: faucetfrontend
+    ports:
+      - 80:80
+    networks:
+      poa:
+        ipv4_address: 172.25.0.7
+    
+networks:
+  poa:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: "172.25.0.0/16"

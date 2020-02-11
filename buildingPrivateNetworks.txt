@@ -1,0 +1,49 @@
+If you want to build them individually, follow these steps:
+
+Step 1 : 
+Let's create a network for these containers to communicate with each other with the following command :
+docker network create example
+
+Step 2 : 
+Let's start the bootnode, it uses 30301/udp for P2P discovery.
+
+Within the bootnode folder :
+
+Build the image using the following command :
+docker build -t bootnode .
+
+Spawn a container from the above image using the following command (--name bn is optional) :
+docker run -it -e nodekeyhex="08f0e1dee5c1b4645f3331a566009e41a4514b6cd28656d63d0449ecf812812b" --net example -p 30301:30301/udp --name bn bootnode
+
+Step 3 :
+Let's start a miner node that mines/seals transactions.
+
+Within the miner folder:
+
+Build the miner image using the follwoing command :
+docker build -t anthem .
+
+then, spawn a container from the above image using the following command :
+docker run -it --net example -e bootnodeId="76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c" -e bootnodeIp="172.18.0.2" -p 8545:8545 -p 8546:8546 -p 30303:30303 anthem
+
+Step 4 :
+Let's start another node that just participates in this network.
+
+Within the node1 folder:
+
+Build the node1 image using the follwoing command :
+docker build -t aetna .
+
+then, Spawn a container from the above image using the following command :
+docker run -it --net example -e bootnodeId="76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c" -e bootnodeIp="172.18.0.2" -p 8547:8545 -p 8548:8546 -p 30305:30303 aetna
+
+Step 5 :
+Let's start another node that just participates in this network.
+
+Within the node2 folder:
+
+Build the node2 image using the follwoing command :
+docker build -t cigna .
+
+then, spawn a container from the above image using the following command :
+docker run -it --net example -e bootnodeId="76a8171707eca17647a47ca99ffd348927dfa60102792ea349a25d5192e61855be83b786e376276a306afcceea4ffd1c9c77e4370b417efc39f328a0d068004c" -e bootnodeIp="172.18.0.2" -p 8549:8545 -p 8550:8546 -p 30307:30303 cigna
